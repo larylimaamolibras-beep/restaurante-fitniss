@@ -2,7 +2,7 @@ import streamlit as st
 from datetime import datetime
 
 # 1. Configuração da Página
-st.set_page_config(page_title="Restaurante Fitniss", layout="wide")
+st.set_page_config(page_title="Restaurante Fitness", layout="wide")
 
 # 2. BANCO DE DADOS COMPARTILHADO (A solução para o erro)
 # Isso faz com que o PC veja o que o Celular enviou
@@ -50,7 +50,7 @@ st.markdown("""
     }
     h1, h2, h3, p, label, span { color: #000000 !important; font-weight: bold !important; }
     </style>
-    <div class="topo-fixo">🥗 Restaurante Fitniss</div>
+    <div class="topo-fixo">🥗 Restaurante Fitness</div>
     """, unsafe_allow_html=True)
 
 # 5. Sacola Local (Cada cliente tem a sua)
