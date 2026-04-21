@@ -1,18 +1,27 @@
 import streamlit as st
 from datetime import datetime
 
-# 1. Configuração da Página
+# 1. Configuração da Página e Remoção de Rodapés (Tudo aqui no topo!)
 st.set_page_config(page_title="Restaurante Fitness", layout="wide")
 
-# 2. BANCO DE DADOS COMPARTILHADO (A solução para o erro)
-# Isso faz com que o PC veja o que o Celular enviou
+# Esse bloco de CSS abaixo remove o e-mail (se houvesse), o menu e o "Made with Streamlit"
+hide_st_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            header {visibility: hidden;}
+            </style>
+            """
+st.markdown(hide_st_style, unsafe_allow_html=True)
+
+# 2. BANCO DE DADOS COMPARTILHADO
 @st.cache_resource
 def iniciar_banco_dados():
     return {"pedidos": [], "caixa": 0.0}
 
 dados_globais = iniciar_banco_dados()
 
-# 3. Tabela de Preços (Todos os 10 itens)
+# 3. Tabela de Preços
 PRECOS = {
     "Frango Grelhado": 8.00, "Salada Prime": 5.00, "Suco Detox": 12.00,
     "Omelete Proteico": 5.00, "Bowl de Açaí Fit": 10.00, "Peixe com Quinoa": 25.00,
@@ -20,10 +29,9 @@ PRECOS = {
     "Tapioca Fit": 5.00
 }
 
-# 4. Estilo Visual (CSS para centralizar e colorir)
+# 4. Estilo Visual Adicional
 st.markdown("""
     <style>
-    header {visibility: hidden;}
     .stApp {
         background-image: url("https://images.unsplash.com/photo-1490818387583-1baba5e638af?q=80&w=2000&auto=format&fit=crop");
         background-attachment: fixed; background-size: cover;
@@ -53,7 +61,7 @@ st.markdown("""
     <div class="topo-fixo">🥗 Restaurante Fitness</div>
     """, unsafe_allow_html=True)
 
-# 5. Sacola Local (Cada cliente tem a sua)
+# 5. Sacola Local
 if 'sacola' not in st.session_state:
     st.session_state.sacola = []
 
@@ -104,7 +112,7 @@ if st.session_state.sacola:
 else:
     st.info("Adicione itens acima.")
 
-# --- PAINEL ADM (O QUE APARECE NO COMPUTADOR) ---
+# --- PAINEL ADM ---
 st.divider()
 st.subheader("📟 Gestão (Visível em todos os aparelhos)")
 
