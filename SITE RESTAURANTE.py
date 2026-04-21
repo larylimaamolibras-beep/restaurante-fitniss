@@ -78,7 +78,7 @@ c9, c10 = st.columns(2); criar_item(c9, "Sopa de Legumes", "sopa.jpg"); criar_it
 st.divider()
 
 # --- ÁREA DO CLIENTE ---
-st.subheader("🛒 Sua Sacola")
+st.subheader("🛒 Seu Carrinho")
 if st.session_state.sacola:
     for item in st.session_state.sacola:
         st.write(f"✅ {item['nome']} - R$ {item['preco']:.2f}")
