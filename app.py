@@ -1,271 +1,163 @@
 import streamlit as st
-
+import pandas as pd
+import json
 from datetime import datetime
+import os
+import time
 
+# --- BANCO DE DADOS ---
+DB_FILE = "banco_dados.json"
+ARQUIVO_SENHAS = "usuarios_cadastrados.txt"
 
+def carregar_dados():
+    if not os.path.exists(DB_FILE):
+        return {"cardapio": [], "pedidos": [], "vendas_finalizadas": []}
+    with open(DB_FILE, "r") as f: return json.load(f)
 
-# 1. Configuração da Página
+def salvar_dados(dados):
+    with open(DB_FILE, "w") as f: json.dump(dados, f, indent=4)
 
-st.set_page_config(page_title="Restaurante Fitness", layout="wide")
+def carregar_usuarios():
+    usuarios = {"admin": "123"}
+    if os.path.exists(ARQUIVO_SENHAS):
+        with open(ARQUIVO_SENHAS, "r") as f:
+            for linha in f:
+                if ":" in linha:
+                    u, s = linha.strip().split(":")
+                    usuarios[u] = s
+    return usuarios
 
+def salvar_usuario(u, s):
+    with open(ARQUIVO_SENHAS, "a") as f: f.write(f"{u}:{s}\n")
 
+st.set_page_config(page_title="ADM PROFISSIONAL", layout="wide")
 
-# 2. BANCO DE DADOS COMPARTILHADO (A solução para o erro)
+if 'logado' not in st.session_state: st.session_state.logado = False
+dados = carregar_dados()
+usuarios = carregar_usuarios()
+META_DIARIA = 1500.00 
 
-# Isso faz com que o PC veja o que o Celular enviou
-
-@st.cache_resource
-
-def iniciar_banco_dados():
-
-    return {"pedidos": [], "caixa": 0.0}
-
-
-
-dados_globais = iniciar_banco_dados()
-
-
-
-# 3. Tabela de Preços (Todos os 10 itens)
-
-PRECOS = {
-
-    "Frango Grelhado": 8.00, "Salada Prime": 5.00, "Suco Detox": 12.00,
-
-    "Omelete Proteico": 5.00, "Bowl de Açaí Fit": 10.00, "Peixe com Quinoa": 25.00,
-
-    "Café Expresso Fit": 5.50, "Sanduíche Integral": 10.00, "Sopa de Legumes": 10.00,
-
-    "Tapioca Fit": 5.00
-
-}
-
-
-
-# 4. Estilo Visual (CSS para centralizar e colorir)
-
+# --- CSS MELHORADO PARA LEITURA ---
 st.markdown("""
-
     <style>
-
-    header {visibility: hidden;}
-
-    .stApp {
-
-        background-image: url("https://images.unsplash.com/photo-1490818387583-1baba5e638af?q=80&w=2000&auto=format&fit=crop");
-
-        background-attachment: fixed; background-size: cover;
-
+    .stApp { background-color: #0e1117; }
+    .banner-topo { 
+        background-color: #00FF00; border-radius: 15px; padding: 15px; 
+        color: black !important; font-size: 24px; font-weight: 900; 
+        text-align: center; margin-bottom: 20px; 
     }
-
-    .topo-fixo {
-
-        position: fixed; top: 0; left: 0; width: 100%;
-
-        background-color: #1b5e20 !important; color: white !important;
-
-        text-align: center; padding: 15px 0px; font-size: 30px; font-weight: bold; z-index: 9999;
-
+    .card-item {
+        background-color: #1a1c24;
+        border: 1px solid #00FF00;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 10px;
     }
-
-    .stMainBlockContainer {
-
-        background-color: rgba(255, 255, 255, 0.9) !important; 
-
-        padding-top: 20px !important; border-radius: 0px 0px 20px 20px; margin-top: 75px !important;
-
-    }
-
-    [data-testid="stColumn"] { display: flex !important; flex-direction: column !important; align-items: center !important; text-align: center !important; }
-
-    .stButton>button { background-color: #2e7d32 !important; color: white !important; width: 180px !important; border-radius: 8px !important; }
-
-    
-
-    .status-cozinha { color: #FF8C00 !important; font-weight: bold; } 
-
-    .status-pagamento { color: #FF0000 !important; font-weight: bold; } 
-
-    .status-ok { color: #008000 !important; font-weight: bold; } 
-
-    
-
-    .caixa-total { 
-
-        background-color: #1b5e20; color: white !important; padding: 20px; 
-
-        border-radius: 10px; text-align: center; font-size: 26px; border: 3px solid #FFD700;
-
-    }
-
-    h1, h2, h3, p, label, span { color: #000000 !important; font-weight: bold !important; }
-
+    h1, h2, h3, p, label { color: white !important; }
+    .stButton>button { width: 100%; }
     </style>
+""", unsafe_allow_html=True)
 
-    <div class="topo-fixo">🥗 Restaurante Fitness</div>
-
-    """, unsafe_allow_html=True)
-
-
-
-# 5. Sacola Local (Cada cliente tem a sua)
-
-if 'sacola' not in st.session_state:
-
-    st.session_state.sacola = []
-
-
-
-def criar_item(coluna, nome, foto):
-
-    with coluna:
-
-        try:
-
-            st.image(foto, width=150)
-
-            st.markdown(f"**{nome}**")
-
-            st.markdown(f"**R$ {PRECOS[nome]:.2f}**")
-
-            if st.button(f"🛒 Adicionar", key=f"btn_{nome}"):
-
-                st.session_state.sacola.append({"nome": nome, "preco": PRECOS[nome]})
-
-                st.toast(f"{nome} adicionado!")
-
-        except: st.error(f"Erro na foto {nome}")
-
-
-
-# --- CARDÁPIO ---
-
-c1, c2 = st.columns(2); criar_item(c1, "Frango Grelhado", "frango.jpg"); criar_item(c2, "Salada Prime", "salada.jpg")
-
-c3, c4 = st.columns(2); criar_item(c3, "Suco Detox", "suco.jpg"); criar_item(c4, "Omelete Proteico", "omelete.jpg")
-
-c5, c6 = st.columns(2); criar_item(c5, "Bowl de Açaí Fit", "acai.jpg"); criar_item(c6, "Peixe com Quinoa", "peixe.jpg")
-
-c7, c8 = st.columns(2); criar_item(c7, "Café Expresso Fit", "cafe.jpg"); criar_item(c8, "Sanduíche Integral", "sanduiche.jpg")
-
-c9, c10 = st.columns(2); criar_item(c9, "Sopa de Legumes", "sopa.jpg"); criar_item(c10, "Tapioca Fit", "tapioca.jpg")
-
-
-
-st.divider()
-
-
-
-# --- ÁREA DO CLIENTE ---
-
-st.subheader("🛒 Seu Carrinho")
-
-if st.session_state.sacola:
-
-    for item in st.session_state.sacola:
-
-        st.write(f"✅ {item['nome']} - R$ {item['preco']:.2f}")
-
-    
-
-    nome_c = st.text_input("Seu Nome:")
-
-    mesa_c = st.number_input("Mesa:", min_value=1, step=1)
-
-    
-
-    if st.button("🚀 ENVIAR PEDIDO COMPLETO"):
-
-        if nome_c:
-
-            novo_p = {
-
-                "ID": len(dados_globais["pedidos"]) + 1,
-
-                "Hora": datetime.now().strftime("%H:%M"),
-
-                "Mesa": mesa_c,
-
-                "Cliente": nome_c,
-
-                "Itens": ", ".join([x['nome'] for x in st.session_state.sacola]),
-
-                "Total": sum([x['preco'] for x in st.session_state.sacola]),
-
-                "Status": "Cozinha"
-
-            }
-
-            dados_globais["pedidos"].append(novo_p)
-
-            st.session_state.sacola = []
-
-            st.success("Pedido enviado! Olhe o computador agora.")
-
-            st.rerun()
+# --- LOGIN (MANTIDO) ---
+if not st.session_state.logado:
+    st.markdown('<div class="banner-topo">ACESSO RESTRITO - ADM</div>', unsafe_allow_html=True)
+    col1, col2, col3 = st.columns([1, 1.5, 1])
+    with col2:
+        tab1, tab2 = st.tabs(["🔑 ENTRAR", "📝 CADASTRAR"])
+        with tab1:
+            with st.form("login"):
+                u = st.text_input("Usuário")
+                p = st.text_input("Senha", type="password")
+                if st.form_submit_button("ACESSAR"):
+                    if u in usuarios and usuarios[u] == p:
+                        st.session_state.logado = True
+                        st.rerun()
+                    else: st.error("❌ Credenciais incorretas")
+        with tab2:
+            with st.form("cadastro"):
+                nu = st.text_input("Novo Usuário")
+                np = st.text_input("Nova Senha", type="password")
+                if st.form_submit_button("SALVAR"):
+                    if nu and np:
+                        salvar_usuario(nu, np)
+                        st.success("✅ Cadastrado!")
 
 else:
+    st.markdown('<div class="banner-topo">PAINEL DE GESTÃO DO CARDÁPIO</div>', unsafe_allow_html=True)
+    
+    total_vendas = sum(v['valor'] for v in dados['vendas_finalizadas'])
+    c1, c2 = st.columns(2)
+    c1.metric("VENDIDO HOJE", f"R$ {total_vendas:.2f}")
+    c2.metric("META DIÁRIA", f"R$ {META_DIARIA:.2f}")
 
-    st.info("Adicione itens acima.")
+    abas = st.tabs(["📥 PEDIDOS", "⚙️ EDITAR CARDÁPIO"])
 
+    with abas[1]:
+        # Botões de Adicionar
+        col_add1, col_add2 = st.columns(2)
+        if col_add1.button("➕ NOVO PRATO"):
+            dados['cardapio'].append({"item": "Novo Prato", "preco": 0.0, "imagem": "", "descricao": "", "tipo": "Prato"})
+            salvar_dados(dados)
+            st.rerun()
+        if col_add2.button("➕ NOVA BEBIDA"):
+            dados['cardapio'].append({"item": "Nova Bebida", "preco": 0.0, "imagem": "", "descricao": "", "tipo": "Bebida"})
+            salvar_dados(dados)
+            st.rerun()
 
+        st.write("---")
 
-# --- PAINEL ADM (O QUE APARECE NO COMPUTADOR) ---
-
-st.divider()
-
-st.subheader("📟 Gestão (Visível em todos os aparelhos)")
-
-
-
-if dados_globais["pedidos"]:
-
-    for i, p in enumerate(dados_globais["pedidos"]):
-
-        with st.expander(f"Mesa {p['Mesa']} - {p['Cliente']}"):
-
-            st.write(f"**Pedido:** {p['Itens']}")
-
+        # Listagem dos Itens para Editar
+        for i, item in enumerate(dados['cardapio']):
+            tipo = item.get('tipo', 'Prato')
+            cor_borda = "#00FF00" if tipo == "Prato" else "#00BFFF"
             
+            with st.container():
+                st.markdown(f'<div style="border-left: 10px solid {cor_borda}; background: #1a1c24; padding: 15px; border-radius: 5px; margin-bottom: 20px;">', unsafe_allow_html=True)
+                
+                c_img, c_info = st.columns([1, 3])
+                
+                with c_img:
+                    url = st.text_input("URL Imagem", item['imagem'], key=f"img{i}")
+                    if url:
+                        st.image(url, use_container_width=True)
+                    else:
+                        st.warning("Sem Foto")
+                
+                with c_info:
+                    col_n, col_p, col_t = st.columns([2, 1, 1])
+                    dados['cardapio'][i]['item'] = col_n.text_input("Nome do Item", item['item'], key=f"n{i}")
+                    dados['cardapio'][i]['preco'] = col_p.number_input("Preço (R$)", float(item['preco']), key=f"p{i}")
+                    dados['cardapio'][i]['tipo'] = col_t.selectbox("Tipo", ["Prato", "Bebida"], index=0 if tipo == "Prato" else 1, key=f"t{i}")
+                    
+                    if dados['cardapio'][i]['tipo'] == "Prato":
+                        dados['cardapio'][i]['descricao'] = st.text_area("Descrição (Arroz, feijão...)", item.get('descricao', ''), key=f"d{i}")
+                    
+                    dados['cardapio'][i]['imagem'] = url
+                    
+                    # Ações do Item
+                    btn_col1, btn_col2 = st.columns(2)
+                    if btn_col1.button("✅ SALVAR ALTERAÇÃO", key=f"s{i}"):
+                        salvar_dados(dados)
+                        st.success("Atualizado com sucesso!")
+                    
+                    if btn_col2.button("🗑️ EXCLUIR ITEM", key=f"del{i}"):
+                        dados['cardapio'].pop(i)
+                        salvar_dados(dados)
+                        st.rerun()
+                
+                st.markdown('</div>', unsafe_allow_html=True)
 
-            if p['Status'] == "Cozinha":
+    with abas[0]:
+        # Pedidos (Código mantido)
+        pedidos_novos = [p for p in dados['pedidos'] if p['status'] == "Pendente"]
+        for p in pedidos_novos:
+            st.warning(f"Mesa: {p['mesa']} | Item: {p['item']} | R$ {p['valor']:.2f}")
+            if st.button("FINALIZAR", key=f"f{p['id']}"):
+                dados['vendas_finalizadas'].append({"valor": p['valor']})
+                for pr in dados['pedidos']:
+                    if pr['id'] == p['id']: pr['status'] = "Concluido"
+                salvar_dados(dados)
+                st.rerun()
 
-                st.markdown(f"Status: <span class='status-cozinha'>🟠 AGUARDANDO ENTREGA</span>", unsafe_allow_html=True)
-
-                if st.button(f"Entregue na Mesa #{p['ID']}", key=f"ent_{i}"):
-
-                    dados_globais["pedidos"][i]["Status"] = "Pagamento"
-
-                    st.rerun()
-
-            
-
-            elif p['Status'] == "Pagamento":
-
-                st.markdown(f"Status: <span class='status-pagamento'>🔴 AGUARDANDO PAGAMENTO</span>", unsafe_allow_html=True)
-
-                if st.button(f"PAGAMENTO REALIZADO #{p['ID']}", key=f"pay_{i}"):
-
-                    dados_globais["pedidos"][i]["Status"] = "Finalizado"
-
-                    dados_globais["caixa"] += p['Total']
-
-                    st.rerun()
-
-            else:
-
-                st.markdown(f"Status: <span class='status-ok'>🟢 PAGO</span>", unsafe_allow_html=True)
-
-
-
-st.markdown(f'<div class="caixa-total">💰 CAIXA TOTAL: R$ {dados_globais["caixa"]:.2f}</div>', unsafe_allow_html=True)
-
-
-
-if st.button("🧹 Zerar Tudo"):
-
-    dados_globais["pedidos"] = []
-
-    dados_globais["caixa"] = 0.0
-
-    st.rerun() 
+    time.sleep(10)
+    st.rerun()
