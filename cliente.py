@@ -15,7 +15,7 @@ def salvar_dados(dados):
 
 st.set_page_config(page_title="Cardápio Restaurante Fitness", layout="centered")
 
-# --- ESTILO LIMPO ---
+# --- SEU ESTILO ORIGINAL ---
 st.markdown("""
     <style>
     .stApp { background-color: #000000; }
@@ -29,9 +29,12 @@ st.markdown("""
         border: 2px solid #00FF00; padding: 15px; 
         border-radius: 15px; margin-bottom: 20px; background: #111; 
     }
+    .badge-promo { 
+        background: #ff4b4b; color: white; padding: 2px 8px; 
+        border-radius: 5px; font-size: 14px; font-weight: bold;
+    }
     .preco-antigo { color: #ff4b4b; text-decoration: line-through; font-size: 14px; }
-    .preco-novo { color: #00FF00; font-size: 20px; font-weight: bold; }
-    .badge-promo { background: #ff4b4b; color: white; padding: 2px 8px; border-radius: 5px; font-size: 12px; }
+    .preco-novo { color: #00FF00; font-size: 22px; font-weight: bold; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -48,11 +51,8 @@ for i, item in enumerate(pratos):
     with st.container():
         st.markdown('<div class="item-container">', unsafe_allow_html=True)
         col_img, col_info = st.columns([1, 1.5])
-        
         with col_img:
             if item.get('imagem'): st.image(item['imagem'], use_container_width=True)
-            else: st.info("Sem foto")
-        
         with col_info:
             st.subheader(item['item'])
             st.write(f"R$ {item['preco']:.2f}")
@@ -65,30 +65,31 @@ for i, item in enumerate(pratos):
         carne = st.radio("Proteína:", ["Frango", "Carne de Sol", "Fígado", "Bife", "Suíno", "Omelete"], key=f"prot_{i}")
         
         if st.button(f"🛒 PEDIR PRATO", key=f"btn_p_{i}"):
+            dados_atuais = carregar_dados()
             escolhas = [opt for opt, val in zip(["Arroz", "Feijão", "Macarrão"], [arroz, feijao, mac]) if val]
             resumo = f"{item['item']} ({', '.join(escolhas)}) + {carne}"
             novo_p = {"id": int(time.time()), "mesa": mesa, "item": resumo, "valor": item['preco'], "pagamento": "No Caixa", "status": "Pendente", "hora": datetime.now().strftime("%H:%M")}
-            dados['pedidos'].append(novo_p)
-            salvar_dados(dados)
+            dados_atuais['pedidos'].append(novo_p)
+            salvar_dados(dados_atuais)
             st.success("✅ Adicionado!")
         st.markdown('</div>', unsafe_allow_html=True)
 
-# --- SEÇÃO DE BEBIDAS (CORRIGIDA) ---
+# --- SEÇÃO DE BEBIDAS COM PROMOÇÃO E FOTO ---
 st.markdown('<div class="secao-titulo">🥤 BEBIDAS E SUCOS</div>', unsafe_allow_html=True)
 bebidas_banco = [b for b in dados['cardapio'] if b.get('tipo') == "Bebida"]
 
 for b, beb in enumerate(bebidas_banco):
     preco_original = beb['preco']
     preco_final = preco_original
-    promo_text = ""
+    promo_label = ""
     
-    # Lógica de desconto silenciosa
+    # Lógica da Promoção
     if "detox" in beb['item'].lower():
         preco_final = preco_original * 0.80
-        promo_text = "PROMO -20%"
+        promo_label = "PROMO -20%"
     elif any(x in beb['item'].lower() for x in ["coca", "guaraná", "fanta", "refrigerante"]):
         preco_final = preco_original * 0.95
-        promo_text = "PROMO -5%"
+        promo_label = "PROMO -5%"
 
     with st.container():
         st.markdown('<div class="item-container">', unsafe_allow_html=True)
@@ -100,8 +101,8 @@ for b, beb in enumerate(bebidas_banco):
             
         with col_b_txt:
             st.markdown(f"**{beb['item']}**")
-            if promo_text:
-                st.markdown(f'<span class="badge-promo">{promo_text}</span>', unsafe_allow_html=True)
+            if promo_label:
+                st.markdown(f'<span class="badge-promo">{promo_label}</span>', unsafe_allow_html=True)
                 st.markdown(f'<span class="preco-antigo">R$ {preco_original:.2f}</span>', unsafe_allow_html=True)
                 st.markdown(f'<span class="preco-novo">R$ {preco_final:.2f}</span>', unsafe_allow_html=True)
             else:
@@ -109,8 +110,13 @@ for b, beb in enumerate(bebidas_banco):
         
         with col_b_btn:
             if st.button("🛒", key=f"btn_beb_{b}"):
+                dados_atuais = carregar_dados()
                 novo_b = {"id": int(time.time()), "mesa": mesa, "item": f"BEBIDA: {beb['item']}", "valor": preco_final, "pagamento": "No Caixa", "status": "Pendente", "hora": datetime.now().strftime("%H:%M")}
-                dados['pedidos'].append(novo_b)
-                salvar_dados(dados)
+                dados_atuais['pedidos'].append(novo_b)
+                salvar_dados(dados_atuais)
                 st.toast(f"✅ {beb['item']} no carrinho!")
         st.markdown('</div>', unsafe_allow_html=True)
+
+# Sincronização automática para aparecer no ADM
+time.sleep(10)
+st.rerun()
