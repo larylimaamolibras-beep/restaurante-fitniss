@@ -1,18 +1,22 @@
 {
     "cardapio": [
         {
-            "item": "ALMO\u00c7O",
+            "item": "ALMOÇO",
             "preco": 13.0,
-            "imagem": "https://media.gazetadopovo.com.br/2023/07/21175620/high-angle-delicious-brazilian-food-composition-960x540.jpg",
+            "imagem": "https://plus.unsplash.com/premium_photo-1673108852141-e8c3c22a4a22?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8YWxtbyVDMyVBN298ZW58MHx8MHx8fDA%3D",
             "descricao": "",
-            "tipo": "Prato"
+            "tipo": "Prato",
+            "em_promo": false,
+            "porcentagem": 9
         },
         {
-            "item": "Guaran\u00e1 1lt ",
+            "item": "Guaraná 1lt ",
             "preco": 8.0,
             "imagem": "data:image/jpeg;base64,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",
             "descricao": "",
-            "tipo": "Bebida"
+            "tipo": "Bebida",
+            "em_promo": true,
+            "porcentagem": 4
         },
         {
             "item": "SUCO DETOX",
@@ -27,112 +31,25 @@
             "imagem": "data:image/png;base64,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",
             "descricao": "",
             "tipo": "Bebida"
+        },
+        {
+            "item": "MONSTER ENERGY",
+            "preco": 10.0,
+            "imagem": "https://naturalterra.vtexassets.com/arquivos/ids/173858/Energetico-Monster-Energy-473ml-gelado.jpg.jpg?v=638931261467200000",
+            "descricao": "",
+            "tipo": "Bebida",
+            "em_promo": true,
+            "porcentagem": 5
+        },
+        {
+            "item": "Novo Prato",
+            "preco": 0.0,
+            "imagem": "",
+            "tipo": "Prato",
+            "em_promo": false,
+            "porcentagem": 0
         }
     ],
-    "pedidos": [
-        {
-            "id": 1777080797,
-            "mesa": "Mesa 01",
-            "item": "Novo",
-            "valor": 0.0,
-            "pagamento": "Pix",
-            "status": "Concluido",
-            "hora": "22:33"
-        },
-        {
-            "id": 1777081214,
-            "mesa": "Mesa 01",
-            "item": "ALMO\u00c7O (Arroz, Feij\u00e3o, Macarr\u00e3o) + Frango Grelhado | Obs: COLOCA TOMATE",
-            "valor": 12.0,
-            "pagamento": "Pix",
-            "status": "Concluido",
-            "hora": "22:40"
-        },
-        {
-            "id": 1777081367,
-            "mesa": "Mesa 01",
-            "item": "GRANGO GRELHADO (Arroz, Feij\u00e3o, Macarr\u00e3o) + Frango Grelhado",
-            "valor": 13.0,
-            "pagamento": "Pix",
-            "status": "Concluido",
-            "hora": "22:42"
-        },
-        {
-            "id": 1777082729,
-            "mesa": "Mesa 01",
-            "item": "ALMO\u00c7O (Arroz, Feij\u00e3o, Macarr\u00e3o) + Carne de Sol",
-            "valor": 13.0,
-            "pagamento": "A definir no caixa",
-            "status": "Concluido",
-            "hora": "23:05"
-        },
-        {
-            "id": 1777082757,
-            "mesa": "Mesa 01",
-            "item": "BEBIDA: Coca-Cola 1lt",
-            "valor": 10.0,
-            "pagamento": "A definir no caixa",
-            "status": "Concluido",
-            "hora": "23:05"
-        },
-        {
-            "id": 1777083825,
-            "mesa": "Mesa 05",
-            "item": "ALMO\u00c7O (Arroz, Feij\u00e3o) + Carne de Sol",
-            "valor": 13.0,
-            "pagamento": "No Caixa",
-            "status": "Concluido",
-            "hora": "23:23"
-        },
-        {
-            "id": 1777083834,
-            "mesa": "Mesa 05",
-            "item": "BEBIDA: COCA-COLA LATA",
-            "valor": 5.699999999999999,
-            "pagamento": "No Caixa",
-            "status": "Concluido",
-            "hora": "23:23"
-        },
-        {
-            "id": 1777086855,
-            "mesa": "Mesa 05",
-            "item": "ALMO\u00c7O (Arroz, Feij\u00e3o) + Carne de Sol",
-            "valor": 13.0,
-            "pagamento": "No Caixa",
-            "status": "Pendente",
-            "hora": "00:14"
-        },
-        {
-            "id": 1777086858,
-            "mesa": "Mesa 05",
-            "item": "BEBIDA: Guaran\u00e1 1lt ",
-            "valor": 7.6,
-            "pagamento": "No Caixa",
-            "status": "Pendente",
-            "hora": "00:14"
-        }
-    ],
-    "vendas_finalizadas": [
-        {
-            "valor": 0.0
-        },
-        {
-            "valor": 12.0
-        },
-        {
-            "valor": 13.0
-        },
-        {
-            "valor": 13.0
-        },
-        {
-            "valor": 10.0
-        },
-        {
-            "valor": 13.0
-        },
-        {
-            "valor": 5.699999999999999
-        }
-    ]
+    "pedidos": [],
+    "vendas_finalizadas": []
 }
